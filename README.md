@@ -70,6 +70,35 @@ builds the PKESK from the message it wants to read.
 
 The app also serves `/metrics` in Prometheus text format.
 
+## Decrypt a message
+
+`tvc-gpg-client` is the client an engineer runs. Build it with `make client`.
+It reads a message encrypted to the team key, asks the app for that message's
+session key, and hands the key to gpg.
+
+```sh
+tvc-gpg-client decrypt \
+  --app-url https://app-<APP_ID>.apps.tvc-dev.turnkey.engineering \
+  --app-id <APP_ID> \
+  --quorum-public-key <130 byte hex> \
+  [--signer <gpg user id or fingerprint>] \
+  [-o OUT] FILE
+```
+
+`FILE` may be binary or armored. `-` reads the message from stdin. The
+plaintext goes to `-o OUT`, or to stdout when there is no `-o`.
+
+The client never sends the message. It sends only the session key packet
+addressed to the team subkey, signed with your own GPG key, so gpg-agent asks
+for your YubiKey tap. It then checks the app's receipt against the quorum
+public key you pass in and stops if anything does not match.
+
+Get the quorum public key from the TVC app page in the dashboard, or from
+`tvc app status`. Pass the key you trust, not one the app told you.
+
+The client talks HTTPS only and follows no redirects, so `--app-url` must be
+an `https` URL. It cannot drive the local `make run` server.
+
 ## Development
 
 ```

@@ -10,6 +10,12 @@ all: build
 build:
 	cargo build --all
 
+# Build the engineer facing client binary.
+.PHONY: client
+client:
+	cargo build --release -p tvc_gpg_client
+	@echo "client built at target/release/tvc-gpg-client"
+
 .PHONY: test
 test: build
 	cargo test --all-targets
