@@ -7,7 +7,9 @@ use axum::{
 };
 use serde::Serialize;
 
-/// Application error response.
+/// Application error response. It holds a status and a fixed message, never
+/// key material and never any part of the request.
+#[derive(Debug)]
 pub struct AppError {
     status: StatusCode,
     message: String,
@@ -37,10 +39,10 @@ impl AppError {
         }
     }
 
-    /// Create the fixed error returned for any rejected session key request.
-    #[must_use]
-    pub fn rejected() -> Self {
-        Self::bad_request("session key request rejected")
+    /// The message this error puts in the body.
+    #[cfg(test)]
+    pub(crate) fn message(&self) -> &str {
+        &self.message
     }
 }
 

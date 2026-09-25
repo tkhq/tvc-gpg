@@ -131,7 +131,7 @@ impl Builder {
             .arg("--quorum-file")
             .arg(&quorum_key_path)
             .arg("--app-id")
-            .arg("e2e-test")
+            .arg("test-app")
             .spawn()
             .expect("failed to spawn tvc_gpg binary")
             .into();
