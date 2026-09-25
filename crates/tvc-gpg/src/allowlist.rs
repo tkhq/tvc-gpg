@@ -74,7 +74,8 @@ impl SigningKey {
 /// One signer the app accepts, held once per key that can verify.
 #[derive(Debug, Clone)]
 pub struct SignerEntry {
-    /// Fingerprint of the certificate this key belongs to, in lower case hex.
+    /// Fingerprint of the certificate this key belongs to, as 40 upper case
+    /// hex characters. Same case as `TeamKey::subkey_fingerprint`.
     pub primary_fingerprint: String,
     /// The whole certificate.
     certificate: Arc<SignedPublicKey>,
@@ -141,7 +142,11 @@ impl Allowlist {
         let mut ambiguous_key_ids = Vec::new();
 
         for certificate in &certificates {
-            let primary_fingerprint = certificate.primary_key.fingerprint().to_string();
+            let primary_fingerprint = certificate
+                .primary_key
+                .fingerprint()
+                .to_string()
+                .to_uppercase();
             let (keys, _defects) = classify(certificate, now);
             for key in keys {
                 let fingerprint = key.fingerprint();
@@ -457,7 +462,10 @@ mod tests {
         let by_fingerprint = allowlist
             .lookup(Some(&fingerprint(RICHARD_PRIMARY)), None)
             .expect("known primary fingerprint is not in the allowlist");
-        assert_eq!(by_fingerprint.primary_fingerprint, RICHARD_PRIMARY);
+        assert_eq!(
+            by_fingerprint.primary_fingerprint,
+            RICHARD_PRIMARY.to_uppercase()
+        );
         assert!(matches!(
             by_fingerprint.verifying_key(),
             SigningKey::Primary(_)
@@ -470,7 +478,10 @@ mod tests {
         let by_key_id = allowlist
             .lookup(None, Some(&key_id(RICHARD_KEY_ID)))
             .expect("known key id is not in the allowlist");
-        assert_eq!(by_key_id.primary_fingerprint, RICHARD_PRIMARY);
+        assert_eq!(
+            by_key_id.primary_fingerprint,
+            RICHARD_PRIMARY.to_uppercase()
+        );
 
         assert!(
             allowlist
@@ -504,7 +515,7 @@ mod tests {
         let entry = earlier
             .lookup(Some(&fingerprint(SEAN_SUBKEY)), None)
             .expect("the subkey is missing before it expired");
-        assert_eq!(entry.primary_fingerprint, SEAN_PRIMARY);
+        assert_eq!(entry.primary_fingerprint, SEAN_PRIMARY.to_uppercase());
         assert!(
             earlier
                 .check(EARLIER)

@@ -1,8 +1,14 @@
 //! Router for the TVC GPG REST server.
 use crate::allowlist::Allowlist;
 use crate::response::AppError;
+use crate::session_key::{MAX_BODY_BYTES, session_key};
 use crate::team_key::TeamKey;
-use axum::{Router, extract::State, response::IntoResponse, routing::get};
+use axum::{
+    Router,
+    extract::{DefaultBodyLimit, State},
+    response::IntoResponse,
+    routing::{get, post},
+};
 use qos_p256::P256Pair;
 use serde_json::json;
 use std::sync::Arc;
@@ -47,6 +53,10 @@ pub fn router_with_state(state: AppState) -> Router {
         .route("/health", get(health))
         .route("/public-key", get(public_key))
         .route("/revocation-certificate", get(revocation_certificate))
+        .route(
+            "/session-key",
+            post(session_key).layer(DefaultBodyLimit::max(MAX_BODY_BYTES)),
+        )
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))

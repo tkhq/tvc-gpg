@@ -3636,6 +3636,7 @@ dependencies = [
  "qos_hex",
  "qos_json",
  "qos_p256",
+ "rand 0.8.6",
  "serde",
  "serde_json",
  "sha2",
